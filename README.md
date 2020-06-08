@@ -65,7 +65,14 @@ python gen_labels_20.py
 to generate the labels of 2DMOT15 and MOT20. The seqinfo.ini files of 2DMOT15 can be downloaded here [[Google]](https://drive.google.com/open?id=1kJYySZy7wyETH4fKMzgJrYUrTfxKlN1w), [[Baidu],code:8o0w](https://pan.baidu.com/s/1zb5tBW7-YTzWOXpd9IzS0g).
 
 ## Pretrained models and baseline model
+Two network backbones are pre-trained:
+* [Deep Layer Aggregation Network](https://arxiv.org/pdf/1904.07850.pdf): Original adapted with more skip connections like in Feature Pyramid Network.
+* [High-Resolution Network](https://arxiv.org/pdf/1902.09212.pdf)
+
+HRNet achieve higher precision but DLANet reduces ID switches and increasees true positive rate.
+
 * **Pretrained models**
+
 
 DLA-34 COCO pretrained model: [DLA-34 official](https://drive.google.com/file/d/1pl_-ael8wERdUREEnaIfqOV_VF2bEVRT/view).
 HRNetV2 ImageNet pretrained model: [HRNetV2-W18 official](https://1drv.ms/u/s!Aus8VCZ_C_33cMkPimlmClRvmpw), [HRNetV2-W32 official](https://1drv.ms/u/s!Aus8VCZ_C_33dYBMemi9xOUFR0w).
