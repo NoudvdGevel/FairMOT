@@ -98,11 +98,27 @@ ${FAIRMOT_ROOT}
 
 ## Training
 * Download the training data
-* Change the dataset root directory 'root' in src/lib/cfg/data.json and 'data_dir' in src/lib/opts.py
-* Run:
+* Create a JSON like src/lib/cfg/data.json where the training, validation and testing datasets are specified including the data 'root folder. The data_dir is also specified in the training command. 
+* All optional settings can be found in src/lib/opts.py.
+* Initial DLA-34 training:
 ```
 sh experiments/all_dla34.sh
 ```
+
+* Run training on HRNet-32 pre-trained on ImageNet:
+```
+cd src
+python train.py mot --exp_id try_train --batch_size 6 --num_epochs 5 --gpus 0 --data_dir [...] --data_cfg lib/cfg/[...].json  --arch 'hrnet_32' --reid_dim 128
+cd ..
+```
+
+* Run training on DLA-34 pre-trained on COCO:
+```
+cd src
+python train.py mot --exp_id try_train --batch_size 6 --num_epochs 5 --gpus 0 --data_dir [...] --data_cfg lib/cfg/[...].json --reid_dim 128
+cd ..
+```
+* Don't forget to comment lines with 'dcn' in src/libs/models/model.py if you do not build DCNv2 for DLA network backbone.
 
 ## Tracking
 * The default settings run tracking on the validation dataset from 2DMOT15. Using the DLA-34 baseline model, you can run:
@@ -146,17 +162,29 @@ After evaluating on MOT challenge server, you can get 58.7 MOTA on MOT20 test se
 
 ## Demo
 You can input a raw video and get the demo video by running src/demo.py and get the mp4 format of the demo video:
+* Initial demo:
 ```
 cd src
 python demo.py mot --load_model ../models/all_dla34.pth --conf_thres 0.4
 ```
-You can change --input-video and --output-root to get the demos of your own videos.
-
-If you have difficulty building DCNv2 and thus cannot use the DLA-34 baseline model, you can run the demo with the HRNetV2_w18 baseline model (don't forget to comment lines with 'dcn' in src/libs/models/model.py if you do not build DCNv2): 
+* Demo using trained HR-18
 ```
 cd src
-python demo.py mot --load_model ../models/all_hrnet_v2_w18.pth --arch hrnet_18 --reid_dim 128 --conf_thres 0.4
+python demo.py mot --load_model [...]/models/all_hrnet_v2_w18.pth --arch hrnet_18 --reid_dim 128 --conf_thres 0.4 --input-video [...].mp4 --output-root [...]
+cd ..
 ```
+
+* Demo using custom trained HR-32
+```
+cd src
+python demo.py mot --load_model ../exp/mot/[...]/[...].pth --arch hrnet_32 --reid_dim 128 --conf_thres 0.4 --input-video [...].mp4 --output-root ../exp/mot/[...]/[...]
+cd ..
+```
+
+You can change --input-video and --output-root to get the demos of your own videos.
+
+Don't forget to comment lines with 'dcn' in src/libs/models/model.py if you do not build DCNv2 for DLA network backbone. DCNv2 can be hard to install sometimes.
+
 --conf_thres can be set from 0.3 to 0.7 depending on your own videos.
 
 ## Acknowledgement
