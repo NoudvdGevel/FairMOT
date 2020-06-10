@@ -34,7 +34,7 @@ class BaseTrainer(object):
                         auto_output_logging=False) #Comet experiment
     #self.optimizer.add_param_group({'params': self.loss.parameters()})
     hyper_params = {"learning_rate": self.opt.lr, "learning_rate_steps": self.opt.lr_step, 
-      	"batch_size": self.opt.batch_size, "data": self.opt.data_cfg}
+      	"batch_size": self.opt.batch_size, "data": self.opt.data_cfg, "re_id_dim": self.opt.reid_dim}
     self.experiment.log_parameters(hyper_params)
     self.experiment.set_name(self.opt.exp_id)
 
