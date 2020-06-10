@@ -11,5 +11,7 @@
     "test":
     {
         "VIDEO_01_CO0":"./data/VIDEO_01_CO0.val"
-    }
+    },
+    "test_seq":"VIDEO_01_CO1",
+    "test_seq_root":"/content/drive/My Drive/Data/Evaluation/images"
 }
