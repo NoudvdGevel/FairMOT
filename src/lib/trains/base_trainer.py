@@ -3,6 +3,7 @@ from __future__ import division
 from __future__ import print_function
 
 import time
+from comet_ml import Experiment
 import torch
 from progress.bar import Bar
 from models.data_parallel import DataParallel
@@ -27,7 +28,17 @@ class BaseTrainer(object):
     self.optimizer = optimizer
     self.loss_stats, self.loss = self._get_losses(opt)
     self.model_with_loss = ModleWithLoss(model, self.loss)
+    self.experiment = Experiment(api_key="SK59eWBf9ldDhEMbsQx7IW9G6",
+                        project_name="fairmot", workspace="noudvdgevel", 
+                        auto_param_logging=False, auto_metric_logging=False,
+                        auto_output_logging=False) #Comet experiment
     #self.optimizer.add_param_group({'params': self.loss.parameters()})
+    hyper_params = {"learning_rate": self.opt.lr, "learning_rate_steps": self.opt.lr_step, 
+      	"batch_size": self.opt.batch_size, "data": self.opt.data_cfg}
+    self.experiment.log_parameters(hyper_params)
+    self.experiment.set_name(self.opt.exp_id)
+
+
 
   def set_device(self, gpus, chunk_sizes, device):
     if len(gpus) > 1:
@@ -43,6 +54,7 @@ class BaseTrainer(object):
           state[k] = v.to(device=device, non_blocking=True)
 
   def run_epoch(self, phase, epoch, data_loader):
+
     model_with_loss = self.model_with_loss
     if phase == 'train':
       model_with_loss.train()
@@ -84,6 +96,7 @@ class BaseTrainer(object):
         avg_loss_stats[l].update(
           loss_stats[l].mean().item(), batch['input'].size(0))
         Bar.suffix = Bar.suffix + '|{} {:.4f} '.format(l, avg_loss_stats[l].avg)
+        self.experiment.log_metric(l, avg_loss_stats[l].avg)
       if not opt.hide_data_time:
         Bar.suffix = Bar.suffix + '|Data {dt.val:.3f}s({dt.avg:.3f}s) ' \
           '|Net {bt.avg:.3f}s'.format(dt=data_time, bt=batch_time)
