@@ -135,6 +135,56 @@ python track.py mot --load_model ../models/all_hrnet_v2_w18.pth --conf_thres 0.6
 ```
 to see the tracking results (76.6 MOTA using the HRNetV2-W18 baseline model).
 
+* To track on custom dataset, you can run:
+
+```
+cd src
+python track.py mot --save_img True --data_cfg lib/cfg/[...].json --custom_track True --exp_id [...] --load_model ../exp/mot/[...]/[...].pth --conf_thres 0.6 --arch [...] --reid_dim [...]  --output-root ../results
+```
+You can store the results wherever you want. Custom track makes sure the data specified in the .json data file is used to test the tracker (test_seq, test_root). The data should be in the following structure:
+ ```
+ Data
+   |——————images
+   |        └——————seq1
+   |                 └——————0000.jpg
+   |                 └——————,,,,.jpg
+   |                 └——————seqinfo.init
+   |                 └——————gt
+   |                        └——————gt.txt
+   |        └——————seq2
+   |        └——————seq...
+   |
+   └——————labels_with_ids
+            └——————seq1
+   |                 └——————0000.txt  
+   |                 └——————,,,,.txt
+            
+```
+
+Where the seqinfo.int looks like:
+
+```
+[Sequence]
+name= ...
+imDir=
+frameRate=10
+seqLength=753
+imWidth=2048
+imHeight=2048
+imExt=.jpg
+```
+imDir can be empty when there is no extra folder where the images are stored in the sequence.
+
+The ground truth file looks like:
+
+```
+Frame1,ID,x,y,width,height,0,-1,-1,-1
+Frame1,ID,x,y,width,height,0,-1,-1,-1
+Frame2,ID,x,y,width,height,0,-1,-1,-1
+...
+```
+A summary with results for each sequence and an average will be printed and stored. Only computed after all sequences al completed.
+
 * To get the txt results of the test set of MOT16 or MOT17, you can run:
 ```
 cd src
