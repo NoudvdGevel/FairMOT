@@ -64,6 +64,50 @@ python gen_labels_20.py
 ```
 to generate the labels of 2DMOT15 and MOT20. The seqinfo.ini files of 2DMOT15 can be downloaded here [[Google]](https://drive.google.com/open?id=1kJYySZy7wyETH4fKMzgJrYUrTfxKlN1w), [[Baidu],code:8o0w](https://pan.baidu.com/s/1zb5tBW7-YTzWOXpd9IzS0g).
 
+### Custom data
+Custom data should stored in the following structure:
+```
+ Dataset
+   |——————images
+   |        └——————seq1
+   |                 └——————0000.jpg
+   |                 └——————,,,,.jpg
+   |        └——————seq2
+   |        └——————seq...
+   |
+   └——————labels_with_ids
+            └——————seq1
+   |                 └——————0000.txt  
+   |                 └——————,,,,.txt
+```
+So all corresponding labels and images should have the same filename and folder structure from images and labels_with_id on. To run tracking evaluation on a custom dataset, GT information has to be added. More info in section Tracking.
+
+### Data.json configuration
+The src/lib/cfg/*...*.json file specifies the data_root and where/which dataset are used for training, validation, testing and tracking_test. This is done by listing all datasets and their corresponding .train/val/test files which are located in src/data and contain the path to each image from the data_root.
+
+The .json file should look like:
+```
+{
+    "root":"/data/...",
+    "train":
+    {
+        "name":"./data/name.train",
+        "name":"./data/name.train",
+        ...
+    },
+    "test_emb":
+    {
+        "name":"./data/name.val"
+    },
+    "test":
+    {
+        "name":"./data/name.val"
+    },
+    "test_seq":"seq1\nseq2",
+    "test_seq_root":"Data/images"
+}
+```
+
 ## Pretrained models and baseline model
 Two network backbones are pre-trained:
 * [Deep Layer Aggregation Network](https://arxiv.org/pdf/1904.07850.pdf): Original adapted with more skip connections like in Feature Pyramid Network.
@@ -119,6 +163,13 @@ python train.py mot --exp_id try_train --batch_size 6 --num_epochs 5 --gpus 0 --
 cd ..
 ```
 * Don't forget to comment lines with 'dcn' in src/libs/models/model.py if you do not build DCNv2 for DLA network backbone.
+
+### Comet.ml
+Comet is linked to the training process to track all hyper parameters and metrics. The Comet experiment is specified in FairMOT/src/lib/train/base_tracker.py. The experiment name defined in the training is also used in Comet. To link the training to our own Comet project, edit the API key, project and workspae in the Experiment init.
+
+A link to the training is provided in the terminal and is updated real time.
+
+To-do: add detection and embedding validation metrics to the training and to Comet.
 
 ## Tracking
 * The default settings run tracking on the validation dataset from 2DMOT15. Using the DLA-34 baseline model, you can run:
