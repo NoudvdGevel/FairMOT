@@ -152,7 +152,7 @@ sh experiments/all_dla34.sh
 * Run training on HRNet-32 pre-trained on ImageNet:
 ```
 cd src
-python train.py mot --exp_id try_train --batch_size 6 --num_epochs 5 --gpus 0 --data_dir [...] --data_cfg lib/cfg/[...].json  --arch 'hrnet_32' --reid_dim 128
+python train.py mot --exp_id [...] --batch_size 6 --num_epochs 5 --gpus 0 --data_dir [...] --data_cfg lib/cfg/[...].json  --arch 'hrnet_32' --reid_dim 128 --val_interval 5
 cd ..
 ```
 
@@ -165,11 +165,9 @@ cd ..
 * Don't forget to comment lines with 'dcn' in src/libs/models/model.py if you do not build DCNv2 for DLA network backbone.
 
 ### Comet.ml
-Comet is linked to the training process to track all hyper parameters and metrics. The Comet experiment is specified in FairMOT/src/lib/train/base_tracker.py. The experiment name defined in the training is also used in Comet. To link the training to our own Comet project, edit the API key, project and workspae in the Experiment init.
+Comet is linked to the training process to track all hyper parameters and metrics. The Comet experiment is specified in FairMOT/src/train.py and the running losses are logged in FairMOT/src/lib/train/base_tracker.py. The experiment name defined in the training is also used in Comet. To link the training to our own Comet project, edit the API key, project and workspae in the Experiment init.
 
 A link to the training is provided in the terminal and is updated real time.
-
-To-do: add detection and embedding validation metrics to the training and to Comet.
 
 ## Tracking
 * The default settings run tracking on the validation dataset from 2DMOT15. Using the DLA-34 baseline model, you can run:
