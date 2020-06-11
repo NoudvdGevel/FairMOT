@@ -2,15 +2,15 @@
     "root":"/content/drive/My Drive/Data",
     "train":
     {
-        "VIDEO_01_CO0":"./data/VIDEO_01_CO0.train"
+        "VIDEO_01_CO0":"./data/VIDEO_01_CO1.train"
     },
     "test_emb":
     {
-        "VIDEO_01_CO0":"./data/VIDEO_01_CO0.val"
+        "VIDEO_01_CO0":"./data/VIDEO_01_CO1.val"
     },
     "test":
     {
-        "VIDEO_01_CO0":"./data/VIDEO_01_CO0.val"
+        "VIDEO_01_CO0":"./data/VIDEO_01_CO1.val"
     },
     "test_seq":"VIDEO_01_CO1",
     "test_seq_root":"/content/drive/My Drive/Data/Evaluation/images"
