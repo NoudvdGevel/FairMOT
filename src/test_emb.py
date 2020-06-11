@@ -42,6 +42,7 @@ def test_emb(
         opt.device = torch.device('cuda')
     else:
         opt.device = torch.device('cpu')
+        
     print('Creating model...')
     model = create_model(opt.arch, opt.heads, opt.head_conv)
     model = load_model(model, opt.load_model)
@@ -105,7 +106,7 @@ def test_emb(
     return tar_at_far
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1'
     opt = opts().init()
     with torch.no_grad():
-        map = test_emb(opt, batch_size=4)
+        map = test_emb(opt, batch_size=opt.batch_size, print_interval=10)

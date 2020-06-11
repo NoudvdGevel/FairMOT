@@ -135,10 +135,13 @@ def test_det(
 
                 # Extract target boxes as (x1, y1, x2, y2)
                 target_boxes = xywh2xyxy(labels[:, 2:6])
+                
                 target_boxes[:, 0] *= width
                 target_boxes[:, 2] *= width
                 target_boxes[:, 1] *= height
                 target_boxes[:, 3] *= height
+
+                
 
                 '''
                 path = paths[si]
@@ -175,6 +178,8 @@ def test_det(
                         detected.append(best_i)
                     else:
                         correct.append(0)
+    
+            
 
             # Compute Average Precision (AP) per class
             AP, AP_class, R, P = ap_per_class(tp=correct,
@@ -209,7 +214,7 @@ def test_det(
     return mean_mAP, mean_R, mean_P
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0, 1'
     opt = opts().init()
     with torch.no_grad():
-        map = test_det(opt, batch_size=4)
+        map = test_det(opt, batch_size=opt.batch_size, print_interval=1)

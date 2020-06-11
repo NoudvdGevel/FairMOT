@@ -6,6 +6,7 @@ import _init_paths
 
 import os
 
+from comet_ml import Experiment
 import json
 import torch
 import torch.utils.data
@@ -16,6 +17,8 @@ from models.data_parallel import DataParallel
 from logger import Logger
 from datasets.dataset_factory import get_dataset
 from trains.train_factory import train_factory
+from test_det import test_det
+from test_emb import test_emb
 
 
 def main(opt):
@@ -59,8 +62,20 @@ def main(opt):
     )
 
     print('Starting training...')
+    experiment = Experiment(api_key="SK59eWBf9ldDhEMbsQx7IW9G6",
+                        project_name="fairmot", workspace="noudvdgevel", 
+                        auto_param_logging=False, auto_metric_logging=False,
+                        auto_output_logging=False) #Comet experiment. Active metric logged in base_trainer
+    
+
+    hyper_params = {"learning_rate": opt.lr, "learning_rate_steps": opt.lr_step, 
+      	"batch_size": opt.batch_size, "data": opt.data_cfg, 
+        "re_id_dim": opt.reid_dim, "architecture": opt.arch}
+    experiment.log_parameters(hyper_params)
+    experiment.set_name(opt.exp_id)
+
     Trainer = train_factory[opt.task]
-    trainer = Trainer(opt, model, optimizer)
+    trainer = Trainer(opt, model, experiment, optimizer)
     trainer.set_device(opt.gpus, opt.chunk_sizes, opt.device)
     best = 1e10
     for epoch in range(start_epoch + 1, opt.num_epochs + 1):
@@ -74,9 +89,21 @@ def main(opt):
         if opt.val_intervals > 0 and epoch % opt.val_intervals == 0:
             save_model(os.path.join(opt.save_dir, 'model_{}.pth'.format(mark)),
                        epoch, model, optimizer)
+            test_opt = opt
+            test_opt.load_model = '../exp/mot/'+ opt.exp_id + '/model_last.pth'
+            with torch.no_grad():
+              mean_mAP, mean_R, mean_P = test_det(test_opt, batch_size=2, print_interval=1)
+              tar_at_far = test_emb(test_opt, batch_size=1, print_interval=1)
+
+            test_results = {'mAP': mean_mAP, 'recall': mean_R, 'precision': mean_P,
+                            'TPR@FARe-6': tar_at_far[0], 'TPR@FARe-5':tar_at_far[1],
+                            'TPR@FARe-4':tar_at_far[2], 'TPR@FARe-3':tar_at_far[3],
+                            'TPR@FARe-2':tar_at_far[4], 'TPR@FARe-1':tar_at_far[5]}
+            experiment.log_metrics(test_results)
         else:
             save_model(os.path.join(opt.save_dir, 'model_last.pth'),
                        epoch, model, optimizer)
+        
         logger.write('\n')
         if epoch in opt.lr_step:
             save_model(os.path.join(opt.save_dir, 'model_{}.pth'.format(epoch)),
@@ -85,6 +112,7 @@ def main(opt):
             print('Drop LR to', lr)
             for param_group in optimizer.param_groups:
                 param_group['lr'] = lr
+
         if epoch % 5 == 0:
             save_model(os.path.join(opt.save_dir, 'model_{}.pth'.format(epoch)),
                        epoch, model, optimizer)
