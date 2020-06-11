@@ -152,7 +152,7 @@ sh experiments/all_dla34.sh
 * Run training on HRNet-32 pre-trained on ImageNet:
 ```
 cd src
-python train.py mot --exp_id [...] --batch_size 6 --num_epochs 5 --gpus 0 --data_dir [...] --data_cfg lib/cfg/[...].json  --arch 'hrnet_32' --reid_dim 128 --val_interval 5
+python train.py mot --exp_id [...] --batch_size 6 --num_epochs 5 --gpus 0 --data_dir [...] --data_cfg lib/cfg/[...].json  --arch 'hrnet_32' --reid_dim 128 --val_intervals 5
 cd ..
 ```
 
