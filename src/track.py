@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from comet_ml import Experiment
 import _init_paths
 import os
 import os.path as osp
@@ -93,6 +94,16 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
     mkdir_if_missing(result_root)
     data_type = 'mot'
 
+    experiment = Experiment(api_key="SK59eWBf9ldDhEMbsQx7IW9G6",
+                        project_name="fairmot", workspace="noudvdgevel", 
+                        auto_param_logging=False, auto_metric_logging=False,
+                        auto_output_logging=False) #Comet experiment.
+
+    hyper_params = {"conf_thres": opt.conf_thres, "model": opt.load_model.split('/')[-1], 
+      	"data": opt.data_cfg, "re_id_dim": opt.reid_dim, "architecture": opt.arch}
+    experiment.log_parameters(hyper_params)
+    experiment.set_name(opt.exp_id)
+
     # run tracking
     accs = []
     n_frame = 0
@@ -117,10 +128,12 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
         logger.info('Evaluate seq: {}'.format(seq))
         evaluator = Evaluator(data_root, seq, data_type)
         accs.append(evaluator.eval_file(result_filename))
+        
         if save_videos:
             output_video_path = osp.join(output_dir, '{}.mp4'.format(seq))
             cmd_str = 'ffmpeg -f image2 -i {}/%05d.jpg -c:v copy {}'.format(output_dir, output_video_path)
             os.system(cmd_str)
+            experiment.log_asset(output_video_path, file_name="tracking_results.mp4", copy_to_tmp=False)
     timer_avgs = np.asarray(timer_avgs)
     timer_calls = np.asarray(timer_calls)
     all_time = np.dot(timer_avgs, timer_calls)
@@ -136,14 +149,22 @@ def main(opt, data_root='/data/MOT16/train', det_root=None, seqs=('MOT16-05',), 
         formatters=mh.formatters,
         namemap=mm.io.motchallenge_metric_names
     )
+
+    summary_items = summary.to_numpy()
+    for c, seq in enumerate(seqs):
+      for cc, metric in enumerate(summary):
+        experiment.log_metric(metric+"_"+seq, summary_items[c][cc])
+      
     print(strsummary)
     Evaluator.save_summary(summary, os.path.join(result_root, 'summary_{}.xlsx'.format(exp_name)))
-
+    experiment.log_asset(os.path.join(result_root, 'summary_{}.xlsx'.format(exp_name)), 
+      file_name="tracking_results.xlsx", copy_to_tmp=False)
 
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = '0'
     opt = opts().init()
     save_img = opt.save_img
+    save_video = opt.save_video
 
     if not opt.val_mot16:
         seqs_str = '''KITTI-13
@@ -244,4 +265,4 @@ if __name__ == '__main__':
          seqs=seqs,
          show_image=False,
          save_images=save_img,
-         save_videos=False)
+         save_videos=save_video)
