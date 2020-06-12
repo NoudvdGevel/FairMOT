@@ -116,8 +116,8 @@ def test_det(
             dets = post_process(opt, dets, meta)
             dets = merge_outputs(opt, [dets])[1]
 
-            #remain_inds = dets[:, 4] > opt.det_thres
-            #dets = dets[remain_inds]
+            remain_inds = dets[:, 4] > opt.det_thres
+            dets = dets[remain_inds]
             if dets is None:
                 # If there are labels but no detections mark as zero AP
                 if labels.size(0) != 0:
