@@ -169,6 +169,13 @@ Comet is linked to the training process to track all hyper parameters and metric
 
 A link to the training is provided in the terminal and is updated real time.
 
+### Data Augmentation
+Data augmentation is specified in FairMOT/src/lib/datasets/dataset.jde.py. Images are flipped left-right 50% of the time and then the following [augmentation](https://medium.com/uruvideo/dataset-augmentation-with-random-homographies-a8f4b44830d4) is done.
+```
+img, labels, M = random_affine(img, labels, degrees=(-5, 5), translate=(0.10, 0.10), scale=(0.50, 1.20))
+```
+
+
 ## Tracking
 * The default settings run tracking on the validation dataset from 2DMOT15. Using the DLA-34 baseline model, you can run:
 ```
